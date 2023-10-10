@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+
+{% block css %}
+<!-- Select2 css -->
+        <link href="/static/assets/vendor/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        .upload-container {
+            text-align: center;
+            margin: 20px;
+            background-color: #333333;
+            border: 2px solid #111111;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .drag-drop {
+            border: 2px dashed #3498db;
+            padding: 20px;
+            cursor: pointer;
+            background-color: #424242;
+            border-radius: 8px;
+            transition: border 0.3s;
+            color: #3498db;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .drag-drop:hover {
+            border: 2px dashed #2980b9;
+            background-color: #e0f7ff;
+            color: #2980b9;
+        }
+        
+        #preview {
+            margin-top: 20px;
+            width: 20%;
+        }
+        
+        /* Style for video element */
+        video {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+    </style>
+
+{% endblock %}
+
+{% block content %}
+
+
+<div class="content-page">
+    <div class="content">
+        <!-- Start Content-->
+        <!-- Start Content-->
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box">                                    
+                        
+                        <h4 class="page-title">Upload Video</h4>
+                    </div>
+                </div>
+            </div>
+                                       
+            <div class="card">
+                <div class="card-body">
+
+                    <h4 class="header-title mb-3"> Video Length <code>(max: 5 min)</code></h4>
+
+                    <select class="form-control select2" id="therapy_select" data-toggle="select2">
+                        <option>Select Therapy</option>
+                        {% for record in records %}
+                            <option value="{{ record.execrise_type }}">{{ record.execrise_name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <div class="upload-container">
+                        <div id="drop-area" class="drag-drop">
+                            <p>Drag & Drop Video Here</p>
+                            <input type="file" id="videoInput" accept="video/*" />
+                        </div>
+                        <div id="preview" style="display: none;">
+                            <p><strong>Video Duration:</strong> <span id="duration"></span></p>
+                            <video id="video" controls></video>
+                        </div>
+                    </div>
+                    <button id="uploadButton" class="btn btn-info" style="float: right">Upload and Process</button>
+                    
+                    <div id="loader" style="display: none;">
+                        <img src="/static/assets/images/pre_loader2.gif" alt="Loading..." style="width: 50px; height: 50px;">
+                        <div class="progress" style="width:20%;margin-top: 28px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <a href="{% url 'results_page' %}" class="btn btn-primary" 
+                        id="viewResultsLink" style="display: none;"> Show Result </a>
+       
+
+                </div> <!-- end card-body -->
+            </div>
+
+        </div>
+        <!-- container -->
+
+    </div>
+    <!-- content -->
+
+</div>
+<!--  Select2 Js -->
+
+
+{% endblock %}
+
+{% block js %}
+    <!-- plugin js -->
+    <script src="/static/assets/vendor/dropzone/min/dropzone.min.js"></script>
+    <!-- init js -->
+    <script src="/static/assets/js/ui/component.fileupload.js"></script>
+    <!--  Select2 Js -->
+    <script src="/static/assets/vendor/select2/js/select2.min.js"></script>
+
+    <!-- Code Highlight js -->
+    <script src="/static/assets/vendor/highlightjs/highlight.pack.min.js"></script>
+    <script src="/static/assets/js/hyper-syntax.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementsByClassName('.select2').select2();
+          });
+
+        
+
+        const dropArea = document.getElementById('drop-area');
+        const fileInput = document.getElementById('videoInput');
+        const preview = document.getElementById('preview');
+        const durationSpan = document.getElementById('duration');
+        const videoElement = document.getElementById('video');
+
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('active');
+        });
+        
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('active');
+        });
+        
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('active');
+            const file = e.dataTransfer.files[0];
+            handleFile(file);
+        });
+        
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            handleFile(file);
+        });
+        
+        function handleFile(file) {
+            if (file.type.startsWith('video/')) {
+                const videoURL = URL.createObjectURL(file);
+                videoElement.src = videoURL;
+                videoElement.style.display = 'block';
+        
+                videoElement.onloadedmetadata = function() {
+                    const durationInSeconds = videoElement.duration;
+        
+                    if (durationInSeconds > 300) { // 300 seconds = 5 minutes
+                        alert('Video duration should be less than 5 minutes.');
+                        resetUploader();
+                    } else {
+                        displayDuration(durationInSeconds);
+                        preview.style.display = 'block';
+                    }
+                };
+            } else {
+                alert('Please select a valid video file.');
+                resetUploader();
+            }
+        }
+        
+        function displayDuration(durationInSeconds) {
+            const minutes = Math.floor(durationInSeconds / 60);
+            const seconds = Math.round(durationInSeconds % 60);
+            const minuteText = minutes === 1 ? "minute" : "minutes";
+            const secondText = seconds === 1 ? "second" : "seconds";
+        
+            durationSpan.textContent = `${minutes} ${minuteText} and ${seconds} ${secondText}`;
+        }
+        
+        function resetUploader() {
+            videoElement.style.display = 'none';
+            videoElement.removeAttribute('src');
+            durationSpan.textContent = '';
+            preview.style.display = 'none';
+            
+            // Clear the file input
+            fileInput.value = '';
+        }
+
+
+        // Get references to HTML elements
+        const videoInput = document.getElementById('videoInput');
+        const uploadButton = document.getElementById('uploadButton');
+        const viewResultsLink = document.getElementById('viewResultsLink');
+        const loader = document.getElementById('loader');
+        const therapy_select = document.getElementById('therapy_select');
+    
+        // Event listener for the Upload and Process button
+        uploadButton.addEventListener('click', () => {
+            // Get the selected option element
+            const selectedOption = therapy_select.options[therapy_select.selectedIndex];
+
+            // Get the value and text of the selected option
+            const execrise_type = selectedOption.value;
+            const execrise_name = selectedOption.text;
+
+            const uploadedFile = videoInput.files[0];
+            
+            if (uploadedFile) {
+                const formData = new FormData();
+                formData.append('video', uploadedFile);
+                formData.append('execrise_type', execrise_type);
+                formData.append('execrise_name', execrise_name);
+    
+                // Show the full-page loader while processing
+                loader.style.display = 'flex';
+                //console.log(therapy_name)
+                // Send the uploaded video to the backend for processing
+                fetch('recorded_video', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the analysis results
+                    if ('result' in data) {
+                        console.log(data.result)
+                        // Hide the preloader
+                        loader.style.display = 'none';
+                        //resultsContainer.textContent = `Analysis Result: ${data.result}`;
+                        viewResultsLink.style.display = 'block';
+                    } else if ('error' in data) {
+                        loader.style.display = 'none';
+                        resultsContainer.textContent = `Error: ${data.error}`;
+                    }
+                })
+                .catch(error => {
+                    loader.style.display = 'none';
+                    console.log(error);
+                });
+            }
+        });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content-page">
+    <div class="content">
+        <!-- Start Content-->
+        <!-- Start Content-->
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box">                                    
+                        
+                        <h4 class="page-title">Home</h4>
+                    </div>
+                </div>
+            </div>
+{% comment %} 
+            {% if user_info %}
+        <p>Welcome, {{ user_info.username }}!</p>
+        <p>Email: {{ user_info.email }}</p>
+    
+    {% else %}
+        <p>Welcome to the Home Page. Please <a href="{% url 'login' %}">log in</a>.</p>
+    {% endif %} {% endcomment %}
+
+            <div class="row">
+                {% for record in records %}
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card" onclick="execrise(`{{ record.execrise_type }}`,`{{ record.execrise_name }}`)">
+                            <img src="/static/assets/images/e1.jpg" class="card-img-top" alt="...">
+                            <div class="card-body">
+                                <h5 class="card-title"><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#login-modal"
+                                    class="text-success stretched-link" style="text-transform: uppercase;">{{ record.execrise_name }}</a></h5>
+                                <p class="card-text">
+                                    {{ record.description }}
+                                </p>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card -->
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+
+            <div id="login-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="multiple-oneModalLabel" style="text-transform: uppercase;"></h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+            
+                            <form action="{% url 'web_cam' %}" method="GET" class="ps-3 pe-3">
+            
+                                <div class="mb-3">
+                                    <label for="minutes">Minutes:</label>
+                                    <input type="number" class="form-control" id="minutes" name="minutes" min="0" max="5" step="1" required>
+                                    <p id="minutesMessage" style="color: red;"></p>
+                                    <label for="seconds">Seconds:</label>
+                                    <input type="number" class="form-control" id="seconds" name="seconds" min="0" max="59" step="1" value="0" required>
+                                    <input class="form-control" type="hidden" name="execrise_type" id='execrise_type' value="">
+                                    <input class="form-control" type="hidden" name="execrise_name" id='execrise_name' value="">
+                                </div>
+            
+                                <div class="mb-3 text-center">
+                                    {% comment %} <a href="{% url 'web_cam' %}" class="btn rounded-pill btn-primary">Start</a> {% endcomment %}
+                                     <button class="btn rounded-pill btn-primary" type="submit">Start</button>
+                                </div>
+            
+                            </form>
+            
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+            
+                                         
+            
+
+        </div>
+        <!-- container -->
+
+    </div>
+    <!-- content -->
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+
+    <script>
+        function execrise(execrise_type, execrise_name) {
+            console.log(execrise_name)
+                // Set the hidden input value
+                $('#execrise_type').val(execrise_type);
+                $('#execrise_name').val(execrise_name);
+                $('#multiple-oneModalLabel').text(execrise_name);
+            };
+
+
+            const minutesInput = document.getElementById('minutes');
+            const minutesMessage = document.getElementById('minutesMessage');
+
+            // Add an event listener to the minutes input field
+            minutesInput.addEventListener('input', function () {
+                const inputValue = parseInt(minutesInput.value, 10);
+                
+                // Check if the input exceeds the maximum value (5)
+                if (inputValue > 5) {
+                    minutesInput.value = 5; // Set the value to 5
+                    minutesMessage.textContent = 'Maximum value is 5. Value set to 5.';
+                } else {
+                    minutesMessage.textContent = ''; // Clear the error message
+                }
+            });
+
+    </script>
+
+{% endblock %}
