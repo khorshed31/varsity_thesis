@@ -27,6 +27,37 @@
       cursor: pointer;
       font-weight: bold;
   }
+
+
+  #loader-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#loader-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
 </style>
 
 {% endblock %}
@@ -92,6 +123,11 @@
                   <input type="hidden" value="" id="dateInput" name="date">
                   <button type="submit" class="btn btn-success w-100" id="saveButton">Save</button>
               </form>
+
+              <div id="loader-overlay" style="display:none">
+                <div id="loader-spinner"></div>
+              </div>
+
             </div>
 
         </div>
@@ -207,9 +243,13 @@ function disableSaveButton() {
 
   document.addEventListener('DOMContentLoaded', function () {
       const form = document.getElementById('myForm');
+      const loaderOverlay = document.getElementById('loader-overlay');
 
       form.addEventListener('submit', function (e) {
           e.preventDefault(); // Prevent the default form submission
+
+          // Show the loader overlay
+        loaderOverlay.style.display = 'block';
 
           const formData = new FormData(form);
 
@@ -221,6 +261,8 @@ function disableSaveButton() {
           .then(data => {
               // Handle the response, e.g., display a success message
               console.log(data.message)
+              // Hide the loader overlay after processing
+              loaderOverlay.style.display = 'none';
               showCustomAlert(data.message);
               disableSaveButton();
               //toastr.success(data.message);
@@ -228,6 +270,7 @@ function disableSaveButton() {
           .catch(error => {
               // Handle errors
               //toastr.error(data.message);
+              loaderOverlay.style.display = 'none';
           });
       });
   });

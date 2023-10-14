@@ -8,6 +8,7 @@ urlpatterns = [
     path('web_cam', views.web_cam, name="web_cam"),
     path('therapy', views.therapy, name="therapy"),
     path('recorded_video', views.recorded_video, name="recorded_video"),
+    path('classify_therapy', views.classify_therapy, name="classify_therapy"),
     path('upload_video', views.upload_video, name="upload_video"),
     path('results_page', views.results_page, name='results_page'),
     path('create_report', views.save_form_data, name='create_report'),

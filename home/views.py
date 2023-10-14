@@ -44,6 +44,18 @@ def upload_video(request):
     records = Exercise.objects.all()
     return render(request, 'upload_video.html', {'records': records})
 
+def classify_therapy(request):
+
+    minutes = request.GET.get('minutes', '')
+    seconds = request.GET.get('seconds', '')
+
+    context = {
+        'minutes': minutes,
+        'seconds': seconds,
+    }
+
+    return render(request,'classify_therapy.html', context)
+
 def web_cam(request):
     execrise_name = request.GET.get('execrise_name', '')
     execrise_type = request.GET.get('execrise_type', '')

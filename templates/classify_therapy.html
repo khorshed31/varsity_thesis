@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+
+{% block css %}
+
+    <style>
+        video{
+        max-width: 100%;
+        width: 95%;
+        max-height: 100%;
+        height: auto;
+        border: 2px solid #39afd1;
+        border-radius: 10px;
+        }
+        .widthheight{
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Progress container */
+        .progress-container {
+        width: 100%;
+        max-width: 400px; /* Adjust the maximum width as needed */
+        height: 30px;
+        background-color: #f3f3f3; /* Background color of the container */
+        border-radius: 30px; /* Border radius to create a rounded appearance */
+        overflow: hidden;
+        margin: 20px auto; /* Center the progress bar horizontally */
+        }
+
+        /* Progress bar */
+        .progress-bar {
+        width: 0;
+        height: 100%;
+        background-color: #007bff; /* Progress bar color */
+        border-radius: 30px; /* Border radius to match the container */
+        transition: width 1s ease-in-out; /* Animation duration and easing */
+        position: relative;
+        }
+
+        /* Progress label */
+        .progress-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white; /* Text color */
+        font-weight: bold; /* Font weight for the percentage label */
+        }
+        
+            </style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="content-page">
+    <div class="content">
+
+        <!-- Start Content-->
+       <div class="container-fluid">
+
+            <div class="row">
+                <div class="page-title-box">
+                    <h4 class="page-title">Web Cam</h4>
+                    <div class="d-flex justify-content-between bg-success p-2 text-white rounded">
+
+                        <div class="col-md-6 fs-2">
+                            <strong style="text-transform: uppercase;"><i>Find Exercise name</i></strong>
+                        </div>
+                        <div class="col-md-2">
+                            <div id="loader" style="display: none;">
+                                <img src="/static/assets/images/pre_loader2.gif" alt="Loading..." style="width: 50px; height: 50px;">
+                                <div class="progress-container">
+                                    <div class="progress-bar" id="progressBar">
+                                      <div class="progress-label" id="progressLabel">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="{% url 'results_page' %}" class="btn btn-primary my-1" 
+                                id="viewResultsLink" style="display: none;"> Show Result </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="container">
+                    <div class="flex-column flex-md-row d-flex justify-content-between align-items-center my-3">
+                        <div id="timer" class="col-6 col-sm-3">
+                            <span class="btn btn-primary fs-4 fw-bolder rounded w-100">00:00</span>
+                        </div>
+                    <div class="d-flex justify-content-between align-items-center  mt-3 mt-md-0 mb-0 col-12 col-md-8">
+
+                        <!-- Start button-->
+                        <div class="col-5">
+                            <button class="btn btn-success fs-4 fw-bolder  w-100" id="startRecording">Start Recording</button>
+                        </div>
+                        <!-- end button-->
+                        <div class="col-5">
+                            <button class="btn btn-danger fs-4 fw-bolder  w-100" id="stopRecording" disabled>Stop Recording</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                    <div class="flex-column flex-md-row d-flex justify-content-around">
+                        <div class="col-12 col-md-6  p-1">
+                            <video id="video" autoplay playsinline></video>
+                            <input id="recordMinutes" type="hidden" value="{{ minutes }}">
+                            <input id="recordSeconds" type="hidden" value="{{ seconds }}">
+                        </div>
+                
+                        <div class="col-12 col-md-6  p-1">
+                            <video id="recordedVideo" controls></video>
+                        </div>
+                    </div>
+                </div>
+            
+            </div>
+            
+        </div>
+        <!-- container -->
+
+        <!-- <h1>Upload and Process Video</h1>
+            <input type="file" id="videoInput" accept="video/*">
+            <button id="uploadButton">Upload and Process</button>
+            <div id="loader" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i> Processing...
+            </div>
+            <a href="{% url 'results_page' %}" id="viewResultsLink" style="display: none;">View Results</a> -->
+
+    </div>
+    <!-- content -->
+
+    <!-- Footer Start -->
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <script>document.write(new Date().getFullYear())</script> © SUB
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- end Footer -->
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const videoElement = document.getElementById('video');
+        const startRecordingButton = document.getElementById('startRecording');
+        const stopRecordingButton = document.getElementById('stopRecording');
+        const recordedVideoElement = document.getElementById('recordedVideo');
+        const recordDurationInput = document.getElementById('recordDuration');
+        const timerElement = document.getElementById('timer');
+        const execrise_type = new URLSearchParams(window.location.search).get('execrise_type');
+        const execrise_name = new URLSearchParams(window.location.search).get('execrise_name');
+        const viewResultsLink = document.getElementById('viewResultsLink');
+        const loader = document.getElementById('loader');
+
+        const resultSection = document.getElementById('resultSection');
+        const resultText = document.getElementById('resultText');
+        const progressBar = document.getElementById('progressBar');
+        const progressLabel = document.getElementById('progressLabel');
+
+        let mediaRecorder;
+        let recordedChunks = [];
+        let recordingTimer;
+        let remainingTime;
+        function updateTimer() {
+            const minutes = Math.floor(remainingTime / 60000);
+            const seconds = ((remainingTime % 60000) / 1000).toFixed(0);
+            timerElement.innerHTML = `<span class="btn btn-primary fs-4 fw-bolder rounded w-100">${minutes}:${(seconds < 10 ? '0' : '')}${seconds}</span>`;
+        }
+
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = stream;
+                mediaRecorder = new MediaRecorder(stream);
+    
+                mediaRecorder.ondataavailable = function (event) {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+    
+                mediaRecorder.onstop = function () {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    recordedChunks = [];
+                    const formData = new FormData();
+                    formData.append('video', blob, 'recorded_video.webm');
+                    formData.append('execrise_type', execrise_type);
+                    formData.append('execrise_name', execrise_name);
+                    console.log(formData)
+                    // Show the preloader
+                    // Show the full-page loader while processing
+                    loader.style.display = 'flex';
+
+                    // Start the progress bar animation
+                    simulateVideoProcessing(); // Start the progress bar animation
+
+                    // Start the progress bar animation
+                    //progressBar.classList.add('loading');
+                    
+                    // Send the recorded video to the Django backend
+                    fetch('recorded_video', {
+                        method: 'POST',
+                        body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Handle the analysis results
+                        if ('result' in data) {
+
+                            // Handle the analysis results using the handleBackendResponse function
+                            handleBackendResponse(data);
+                            console.log(data.result)
+                            // Hide the preloader
+                            loader.style.display = 'none';
+                            //resultsContainer.textContent = `Analysis Result: ${data.result}`;
+                            viewResultsLink.style.display = 'block';
+                        } else if ('error' in data) {
+                            console.log(data.error)
+                            loader.style.display = 'none';
+                            resultsContainer.textContent = `Error: ${data.error}`;
+                        }
+                    })
+                    .catch(error => {
+                        loader.style.display = 'none';
+                        console.log(error);
+                    });
+                    recordedVideoElement.src = URL.createObjectURL(blob);
+
+
+                    
+                };
+    
+                const minutes = parseInt(document.getElementById('recordMinutes').value, 10);
+                const seconds = parseInt(document.getElementById('recordSeconds').value, 10);
+                const duration = (minutes * 60 + seconds) * 1000; // Convert minutes and seconds to milliseconds
+                remainingTime = duration;
+                updateTimer();
+    
+                mediaRecorder.start();
+                startRecordingButton.disabled = true;
+                stopRecordingButton.disabled = false;
+    
+                recordingTimer = setInterval(function () {
+                    remainingTime -= 1000;
+                    if (remainingTime <= 0) {
+                        stopRecording();
+                    } else {
+                        updateTimer();
+                    }
+                }, 1000);
+            } catch (error) {
+                console.error('Error accessing webcam:', error);
+            }
+        }
+
+
+        // Handle the backend response and update the progress bar
+        function handleBackendResponse(response) {
+            if ('result' in response) {
+                console.log(response.result);
+                // Update the progress bar to 100% when the result is received
+                updateProgressBar(100);
+
+                // Hide the preloader
+                loader.style.display = 'none';
+
+                // Show the view results button
+                viewResultsLink.style.display = 'block';
+            } else if ('error' in response) {
+                console.log(response.error);
+                loader.style.display = 'none';
+                resultsContainer.textContent = `Error: ${response.error}`;
+            }
+        }
+
+        // Update the progress bar width and label
+        function updateProgressBar(percentage) {
+            const progressBar = document.querySelector('.progress-bar');
+            const progressLabel = document.querySelector('.progress-label');
+
+            progressBar.style.width = `${percentage}%`;
+            progressLabel.textContent = `${percentage}%`;
+        }
+
+        // Simulate video processing (you will replace this with your actual video processing logic)
+        function simulateVideoProcessing() {
+            let percentage = 0;
+            const processingInterval = setInterval(() => {
+                percentage += 5; // Adjust the increment value as needed
+                if (percentage <= 100) {
+                    updateProgressBar(percentage);
+                } else {
+                    clearInterval(processingInterval);
+                    // Simulate the backend response (you will replace this with your actual fetch call)
+                    setTimeout(() => {
+                        const data = { result: 'Video processing completed!' }; // Replace with your response data
+                        handleBackendResponse(data);
+                    }, 1000); // Simulate a delay before receiving the backend response
+                }
+            }, 1000); // Adjust the interval for smoother or faster animation
+        }
+    
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                startRecordingButton.disabled = false;
+                stopRecordingButton.disabled = true;
+                clearInterval(recordingTimer);
+                timerElement.innerHTML = `<span class="btn btn-primary fs-4 fw-bolder rounded w-100">00:00</span>`;
+                //timerElement.textContent = '00:00'; // Reset the timer
+            }
+        }
+    
+        startRecordingButton.addEventListener('click', startRecording);
+        stopRecordingButton.addEventListener('click', stopRecording);
+    });
+    
+    
+
+</script>
+
+{% comment %} <script>
+    // Get references to HTML elements
+    const videoInput = document.getElementById('videoInput');
+    const uploadButton = document.getElementById('uploadButton');
+    const recordedVideoElement = document.getElementById('recordedVideo');
+    const predictionsList = document.getElementById('predictionsList');
+    const resultsContainer = document.getElementById('analysis-results');
+    const therapy_name = `{{ therapy_name }}`
+    const viewResultsLink = document.getElementById('viewResultsLink');
+    const loader = document.getElementById('loader');
+
+    // Event listener for the Upload and Process button
+    uploadButton.addEventListener('click', () => {
+        const uploadedFile = videoInput.files[0];
+        
+        if (uploadedFile) {
+            const formData = new FormData();
+            formData.append('video', uploadedFile);
+            formData.append('therapy_name', therapy_name);
+
+            // Show the preloader
+            loader.style.display = 'block'; // Show the preloader
+            //console.log(therapy_name)
+            // Send the uploaded video to the backend for processing
+            fetch('upload_video', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the analysis results
+                if ('result' in data) {
+                    console.log(data.result)
+                    // Hide the preloader
+                    loader.style.display = 'none';
+                    //resultsContainer.textContent = `Analysis Result: ${data.result}`;
+                    viewResultsLink.style.display = 'block';
+                } else if ('error' in data) {
+                    loader.style.display = 'none';
+                    resultsContainer.textContent = `Error: ${data.error}`;
+                }
+            })
+            .catch(error => {
+                loader.style.display = 'none';
+                console.log(error);
+            });
+        }
+    });
+</script> {% endcomment %}
+
+{% endblock %}
