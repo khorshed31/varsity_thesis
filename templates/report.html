@@ -47,17 +47,17 @@
                 </div>
             </div>
             <div class="card text-center">
-              <div class="card-header bg-light text-success">
+              <div class="card-header bg-light text-info">
                 <span style="font-size: 22px;
-                            font-weight: bold;
-                        ">Exercise Report</span>
+                            font-weight: bold;float: left;
+                        ">EXERCISE REPORT</span>
                         <button onclick="goBack()" class="btn btn-warning" style="float: right;"><i class="uil uil-backward">
                         </i> Go Back</button>
               </div>
               <div class="card-body">
                 <h2 class="card-title text-info">{{ user_info.first_name }} {{ user_info.last_name }}</h2>
                 <h3 class="card-text mx-3 text-warning">Email: {{ user_info.email }}</h3>
-                <div class="row mx-5">
+                <div class="row mx-xl-5">
                   <div class="table-responsive" id="reports">
                       <table class="table table-hover table-sm" id="myTable"> 
                           <thead class="table table-dark">
@@ -90,7 +90,7 @@
                   <input type="hidden" value="{{ user_info.first_name }} {{ user_info.last_name }}" name="user_name">
                   <input type="hidden" value="{{ analysis_result }}" name="result">
                   <input type="hidden" value="" id="dateInput" name="date">
-                  <button type="submit" class="btn btn-success w-100" id="saveButton">Save</button>
+                  <button type="submit" class="btn btn-info w-25" id="saveButton">Save</button>
               </form>
             </div>
 

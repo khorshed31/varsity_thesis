@@ -5,6 +5,9 @@
         <link href="/static/assets/vendor/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
     <style>
         .upload-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
             margin: 20px;
             background-color: #333333;
@@ -15,6 +18,8 @@
         }
         
         .drag-drop {
+            width: 100%;
+            overflow-x: hidden;
             border: 2px dashed #3498db;
             padding: 20px;
             cursor: pointer;
@@ -23,7 +28,7 @@
             transition: border 0.3s;
             color: #3498db;
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1rem;
         }
         
         .drag-drop:hover {
@@ -34,12 +39,15 @@
         
         #preview {
             margin-top: 20px;
-            width: 20%;
+           /* width: 20%;*/
         }
         
         /* Style for video element */
         video {
-            max-width: 100%;
+            max-width: 80%;
+            width: 70%;
+            flex-direction: column;
+            align-items: center;
             height: auto;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -168,7 +176,8 @@
                 const videoURL = URL.createObjectURL(file);
                 videoElement.src = videoURL;
                 videoElement.style.display = 'block';
-        
+                //videoElement.style.display = 'flex';
+
                 videoElement.onloadedmetadata = function() {
                     const durationInSeconds = videoElement.duration;
         
@@ -177,7 +186,10 @@
                         resetUploader();
                     } else {
                         displayDuration(durationInSeconds);
-                        preview.style.display = 'block';
+                        //preview.style.display = 'block';
+                        preview.style.display = 'flex';
+                        preview.style.alignItems = 'center';
+                        preview.style.flexDirection = 'column';
                     }
                 };
             } else {
@@ -247,6 +259,7 @@
                         loader.style.display = 'none';
                         //resultsContainer.textContent = `Analysis Result: ${data.result}`;
                         viewResultsLink.style.display = 'block';
+                        viewResultsLink.style.width = '130px';
                     } else if ('error' in data) {
                         loader.style.display = 'none';
                         resultsContainer.textContent = `Error: ${data.error}`;
