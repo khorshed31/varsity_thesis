@@ -65,18 +65,16 @@
             <div class="row">
                 <div class="page-title-box">
                     <h4 class="page-title">Web Cam</h4>
-                    <div class="d-flex justify-content-between bg-success p-2 text-white rounded">
+                    <div class="d-flex justify-content-between bg-primary p-2 text-dark bg-opacity-25 rounded">
 
                         <div class="col-md-6 fs-2">
-                            <strong style="text-transform: uppercase;"><i>{{ execrise_name }}</i></strong>
+                            <strong style="text-transform: uppercase;" class="">{{ execrise_name }}</strong>
                         </div>
                         <div class="col-md-2">
                             <div id="loader" style="display: none;">
                                 <img src="/static/assets/images/pre_loader2.gif" alt="Loading..." style="width: 50px; height: 50px;">
-                                <div class="progress-container">
-                                    <div class="progress-bar" id="progressBar">
-                                      <div class="progress-label" id="progressLabel">0%</div>
-                                    </div>
+                                <div class="progress" style="width:50%;margin-top: 28px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
                                 </div>
                             </div>
                             <a href="{% url 'results_page' %}" class="btn btn-primary my-1" 
@@ -95,12 +93,17 @@
                     <div class="d-flex justify-content-between align-items-center  mt-3 mt-md-0 mb-0 col-12 col-md-8">
 
                         <!-- Start button-->
-                        <div class="col-5">
-                            <button class="btn btn-success fs-4 fw-bolder  w-100" id="startRecording">Start Recording</button>
+                        <div class="col-3">
+                            <button class="btn btn-outline-success rounded-pill fs-4 fw-bolder  w-100" id="startRecording">Start Recording</button>
                         </div>
+                        
+                        <div class="col-3">
+                            <button class="btn btn-outline-info rounded-pill fs-4 fw-bolder  w-100" id="pauseResumeRecording" disabled>Pause Recording</button>
+                        </div>
+                        
                         <!-- end button-->
-                        <div class="col-5">
-                            <button class="btn btn-danger fs-4 fw-bolder  w-100" id="stopRecording" disabled>Stop Recording</button>
+                        <div class="col-3">
+                            <button class="btn btn-outline-danger rounded-pill fs-4 fw-bolder  w-100" id="stopRecording" disabled>Stop Recording</button>
                         </div>
                     </div>
 
@@ -160,6 +163,7 @@
         const videoElement = document.getElementById('video');
         const startRecordingButton = document.getElementById('startRecording');
         const stopRecordingButton = document.getElementById('stopRecording');
+        const pauseResumeButton = document.getElementById('pauseResumeRecording');
         const recordedVideoElement = document.getElementById('recordedVideo');
         const recordDurationInput = document.getElementById('recordDuration');
         const timerElement = document.getElementById('timer');
@@ -173,14 +177,42 @@
         const progressBar = document.getElementById('progressBar');
         const progressLabel = document.getElementById('progressLabel');
 
+        let isPaused = false;
         let mediaRecorder;
         let recordedChunks = [];
         let recordingTimer;
         let remainingTime;
+
         function updateTimer() {
             const minutes = Math.floor(remainingTime / 60000);
             const seconds = ((remainingTime % 60000) / 1000).toFixed(0);
             timerElement.innerHTML = `<span class="btn btn-primary fs-4 fw-bolder rounded w-100">${minutes}:${(seconds < 10 ? '0' : '')}${seconds}</span>`;
+        }
+
+        async function pauseResumeRecording() {
+            if (mediaRecorder) {
+                if (mediaRecorder.state === 'recording' && !isPaused) {
+                    mediaRecorder.pause();
+                    pauseResumeButton.textContent = 'Resume Recording';
+                    isPaused = true;
+        
+                    clearInterval(recordingTimer); // Pause the timer
+                } else if (mediaRecorder.state === 'inactive' || isPaused) {
+                    mediaRecorder.resume();
+                    pauseResumeButton.textContent = 'Pause Recording';
+                    isPaused = false;
+        
+                    // Resume the timer
+                    recordingTimer = setInterval(function () {
+                        remainingTime -= 1000;
+                        if (remainingTime <= 0) {
+                            stopRecording();
+                        } else {
+                            updateTimer();
+                        }
+                    }, 1000);
+                }
+            }
         }
 
 
@@ -209,7 +241,7 @@
                     loader.style.display = 'flex';
 
                     // Start the progress bar animation
-                    simulateVideoProcessing(); // Start the progress bar animation
+                    //simulateVideoProcessing(); // Start the progress bar animation
 
                     // Start the progress bar animation
                     //progressBar.classList.add('loading');
@@ -225,7 +257,7 @@
                         if ('result' in data) {
 
                             // Handle the analysis results using the handleBackendResponse function
-                            handleBackendResponse(data);
+                            //handleBackendResponse(data);
                             console.log(data.result)
                             // Hide the preloader
                             loader.style.display = 'none';
@@ -255,6 +287,7 @@
     
                 mediaRecorder.start();
                 startRecordingButton.disabled = true;
+                pauseResumeButton.disabled = false;
                 stopRecordingButton.disabled = false;
     
                 recordingTimer = setInterval(function () {
@@ -269,59 +302,15 @@
                 console.error('Error accessing webcam:', error);
             }
         }
-
-
-        // Handle the backend response and update the progress bar
-        function handleBackendResponse(response) {
-            if ('result' in response) {
-                console.log(response.result);
-                // Update the progress bar to 100% when the result is received
-                updateProgressBar(100);
-
-                // Hide the preloader
-                loader.style.display = 'none';
-
-                // Show the view results button
-                viewResultsLink.style.display = 'block';
-            } else if ('error' in response) {
-                console.log(response.error);
-                loader.style.display = 'none';
-                resultsContainer.textContent = `Error: ${response.error}`;
-            }
-        }
-
-        // Update the progress bar width and label
-        function updateProgressBar(percentage) {
-            const progressBar = document.querySelector('.progress-bar');
-            const progressLabel = document.querySelector('.progress-label');
-
-            progressBar.style.width = `${percentage}%`;
-            progressLabel.textContent = `${percentage}%`;
-        }
-
-        // Simulate video processing (you will replace this with your actual video processing logic)
-        function simulateVideoProcessing() {
-            let percentage = 0;
-            const processingInterval = setInterval(() => {
-                percentage += 5; // Adjust the increment value as needed
-                if (percentage <= 100) {
-                    updateProgressBar(percentage);
-                } else {
-                    clearInterval(processingInterval);
-                    // Simulate the backend response (you will replace this with your actual fetch call)
-                    setTimeout(() => {
-                        const data = { result: 'Video processing completed!' }; // Replace with your response data
-                        handleBackendResponse(data);
-                    }, 1000); // Simulate a delay before receiving the backend response
-                }
-            }, 1000); // Adjust the interval for smoother or faster animation
-        }
     
         function stopRecording() {
             if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                 mediaRecorder.stop();
                 startRecordingButton.disabled = false;
+                pauseResumeButton.disabled = true;
                 stopRecordingButton.disabled = true;
+                isPaused = false;
+                pauseResumeButton.textContent = 'Pause Recording';
                 clearInterval(recordingTimer);
                 timerElement.innerHTML = `<span class="btn btn-primary fs-4 fw-bolder rounded w-100">00:00</span>`;
                 //timerElement.textContent = '00:00'; // Reset the timer
@@ -330,60 +319,11 @@
     
         startRecordingButton.addEventListener('click', startRecording);
         stopRecordingButton.addEventListener('click', stopRecording);
+        pauseResumeButton.addEventListener('click', pauseResumeRecording);
     });
     
     
 
 </script>
-
-{% comment %} <script>
-    // Get references to HTML elements
-    const videoInput = document.getElementById('videoInput');
-    const uploadButton = document.getElementById('uploadButton');
-    const recordedVideoElement = document.getElementById('recordedVideo');
-    const predictionsList = document.getElementById('predictionsList');
-    const resultsContainer = document.getElementById('analysis-results');
-    const therapy_name = `{{ therapy_name }}`
-    const viewResultsLink = document.getElementById('viewResultsLink');
-    const loader = document.getElementById('loader');
-
-    // Event listener for the Upload and Process button
-    uploadButton.addEventListener('click', () => {
-        const uploadedFile = videoInput.files[0];
-        
-        if (uploadedFile) {
-            const formData = new FormData();
-            formData.append('video', uploadedFile);
-            formData.append('therapy_name', therapy_name);
-
-            // Show the preloader
-            loader.style.display = 'block'; // Show the preloader
-            //console.log(therapy_name)
-            // Send the uploaded video to the backend for processing
-            fetch('upload_video', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Handle the analysis results
-                if ('result' in data) {
-                    console.log(data.result)
-                    // Hide the preloader
-                    loader.style.display = 'none';
-                    //resultsContainer.textContent = `Analysis Result: ${data.result}`;
-                    viewResultsLink.style.display = 'block';
-                } else if ('error' in data) {
-                    loader.style.display = 'none';
-                    resultsContainer.textContent = `Error: ${data.error}`;
-                }
-            })
-            .catch(error => {
-                loader.style.display = 'none';
-                console.log(error);
-            });
-        }
-    });
-</script> {% endcomment %}
 
 {% endblock %}
