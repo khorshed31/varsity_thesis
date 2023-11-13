@@ -1,0 +1,165 @@
+
+{% extends 'base.html' %}
+
+{% block css %}
+
+ <!-- Datatables css -->
+ <link href="/static/assets/vendor/datatables.net-bs5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
+ <link href="/static/assets/vendor/datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css" rel="stylesheet" type="text/css" />
+
+ <style>
+    /* Style for the alert container */
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+
+    /* Style for the "Cancel" button */
+    .cancel-button {
+        margin-left: 10px;
+        cursor: pointer;
+    }
+
+    /* Style for the "Cancel" button on hover */
+    .cancel-button:hover {
+        text-decoration: underline;
+    }
+
+ </style>    
+
+{% endblock %}
+
+{% block content %}
+
+<div class="content-page">
+    <div class="content">
+
+        <!-- Start Content-->
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box">                                    
+                        <h4 class="page-title">My Patients</h4>
+                    </div>
+                </div>
+            </div>
+
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'custom-error' %}alert-danger{% else %}alert-info{% endif %}">
+                            {{ message }}
+                            <span onclick="cancelAlert(this)" style="float: right">X</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="table-responsive">
+                <table id="basic-datatable" class="table dt-responsive nowrap w-100">
+                <thead>
+                    <tr>
+                        <th>SL No</th>
+                        <th>Patient Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in assigned_patients %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td> 
+                        <td><a href="{% url 'patient_detail' patient.user_id %}"><b>{{ patient.user.first_name }} {{ patient.user.last_name }}</b></a></td>
+                        <td>
+                            {% if patient.is_active == 1 %}
+                                <button class="toggle-status-button btn btn-outline-danger rounded-pill btn-sm" data-patient-id="{{ patient.id }}">Deactivate</button>
+                            {% else %}
+                                <button class="toggle-status-button btn btn-outline-primary rounded-pill btn-sm" data-patient-id="{{ patient.id }}">Activate</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">No data available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+            
+
+        </div>
+        <!-- container -->
+
+    </div>
+    <!-- content -->
+
+    {% include "footer/js_file.html" %}
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+
+
+<script>
+    function cancelAlert(button) {
+        button.parentElement.style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Automatically hide the alert messages after 5 seconds
+        setTimeout(function () {
+            const alertMessages = document.querySelectorAll('.alert');
+            alertMessages.forEach(function (message) {
+                message.style.display = 'none';
+            });
+        }, 5000);
+    });
+</script>
+
+ <!-- Datatables js -->
+ <script src="/static/assets/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
+ <script src="/static/assets/vendor/datatables.net-bs5/js/dataTables.bootstrap5.min.js"></script>
+ <script src="/static/assets/vendor/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+ <script src="/static/assets/vendor/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js"></script>
+ <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+ <script>
+    $(document).ready(function() {
+        $('.toggle-status-button').on('click', function() {
+            var button = $(this);
+            var patientId = button.data('patient-id');
+
+            console.log(patientId)
+            
+            $.get('/account/toggle_patient_status', { patient_id: patientId }, function(data) {
+                if (data.status === 'success') {
+                    // Update the button text
+                    if (data.is_active) {
+                        button.text('Deactivate');
+                    } else {
+                        button.text('Activate');
+                    }
+                } else {
+                    // Handle the error
+                    alert(data.message);
+                }
+            });
+        });
+    });
+</script>
+ 
+ <!-- Datatable Init js -->
+ <script src="/static/assets/js/pages/demo.datatable-init.js"></script>
+
+{% endblock %}
+
+

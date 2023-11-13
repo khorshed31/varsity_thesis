@@ -45,22 +45,34 @@
         <ul class="side-nav">
 
             <li class="side-nav-title side-nav-item">Navigation</li>
+            {% if not user_data.is_staff %}
+                <li class="side-nav-item">
+                    <a href="/home/" class="side-nav-link rounded">
+                        <i class="uil-home-alt"></i>
+                        <span> Home </span>
+                    </a>
+                </li>
 
-            <li class="side-nav-item">
-                <a href="/home/" class="side-nav-link rounded">
-                    <i class="uil-home-alt"></i>
-                    <span> Home </span>
-                </a>
-            </li>
 
-            <li class="side-nav-title side-nav-item">Report</li>
+                <li class="side-nav-title side-nav-item">Report</li>
 
-            <li class="side-nav-item">
-                <a href="{% url 'my_reports' %}" class="side-nav-link rounded">
-                    <i class="uil-receipt"></i>
-                    <span>  Report </span>
-                </a>
-            </li>
+                <li class="side-nav-item">
+                    <a href="{% url 'my_reports' %}" class="side-nav-link rounded">
+                        <i class="uil-receipt"></i>
+                        <span>  Report </span>
+                    </a>
+                </li>
+                
+                <li class="side-nav-item">
+                    <a href="{% url 'my_physiotherapist' %}" class="side-nav-link rounded">
+                        <i class="uil-receipt"></i>
+                        <span>  My Physiotherapist </span>
+                    </a>
+                </li>
+                
+            {% endif %}
+
+            
 
         </ul>
         <!--- End Sidemenu -->

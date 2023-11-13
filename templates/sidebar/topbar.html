@@ -55,12 +55,19 @@
                     <i class="ri-fullscreen-line noti-icon"></i>
                 </a>
             </li>
+            
+            <li class="notification-list d-none d-md-inline-block">
+                <a href="{%url 'signout' %}" class="dropdown-item notify-item">
+                    <i class="mdi mdi-logout me-1"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
 
             <li class="dropdown notification-list">
                 <a class="nav-link dropdown-toggle nav-user arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false"
                     aria-expanded="false">
                     <span class="account-user-avatar"> 
-                        <img src="/static/assets/images/users/avatar-1.jpg" alt="user-image" class="rounded-circle">
+                        <img src="/static/assets/images/users/av1.png" alt="user-image" class="rounded-circle">
                     </span>
                     <span>
                         <span class="account-user-name">
@@ -68,7 +75,13 @@
                             {{ user_info.first_name }} {{ user_info.last_name }}
                             {% endif %}
                         </span>
-                        <span class="account-position">User</span>
+                        <span class="account-position">
+                            {% if user_data.is_staff %}
+                                Physiotherapist
+                            {% else %}
+                                Patient
+                            {% endif %}
+                        </span>
                     </span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">

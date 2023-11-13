@@ -11,6 +11,7 @@ urlpatterns = [
     path('classify_therapy', views.classify_therapy, name="classify_therapy"),
     path('upload_video', views.upload_video, name="upload_video"),
     path('results_page', views.results_page, name='results_page'),
+    path('my_physiotherapist', views.my_physiotherapist, name='my_physiotherapist'),
     path('create_report', views.save_form_data, name='create_report'),
     path('my_reports', views.my_reports, name='my_reports'),
     path('delete_report/<int:report_id>/', views.delete_report, name='delete_report'),

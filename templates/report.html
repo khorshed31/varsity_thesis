@@ -81,13 +81,13 @@
               <div class="card-header bg-light text-info">
                 <span style="font-size: 22px;
                             font-weight: bold;float: left;
-                        ">EXERCISE REPORT</span>
+                        ">PERFORMED EXERCISE REPORT</span>
                         <button onclick="goBack()" class="btn btn-warning" style="float: right;"><i class="uil uil-backward">
                         </i> Go Back</button>
               </div>
               <div class="card-body">
-                <h2 class="card-title text-info">{{ user_info.first_name }} {{ user_info.last_name }}</h2>
-                <h3 class="card-text mx-3 text-warning">Email: {{ user_info.email }}</h3>
+                <h2 class="card-title text-info">Patient: {{ user_info.first_name }} {{ user_info.last_name }}</h2>
+                <h4 class="card-text mx-3 text-warning">Email: {{ user_info.email }}</h4>
                 <div class="row mx-5">
                   <div class="table-responsive" id="reports">
                       <table class="table table-hover table-sm" id="myTable"> 
@@ -102,6 +102,7 @@
                               <th scope="row">{{ execrise_name }}</th>
                               <td>{{ analysis_result }}</td>
                             </tr>
+                            
                           </tbody>
                         </table>
                 

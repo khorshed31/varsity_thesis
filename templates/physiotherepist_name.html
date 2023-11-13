@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block css %}
+
+    <style>
+        
+        
+    </style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="content-page">
+    <div class="content">
+        <!-- Start Content-->
+        <!-- Start Content-->
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box">                                    
+                        
+                        <h4 class="page-title">My Physiotherapist</h4>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+
+                <div class="col-12 col-sm-6 col-md-5">
+                    <div class="card widget-flat bg-info text-dark">
+                        <div class="card-body">
+                            <div class="float-end">
+                                <i class="mdi mdi-doctor widget-icon bg-white text-info"></i>
+                            </div>
+                            <h4 class="text-uppercase mt-0">{{ assigned_physiotherapist.first_name }} {{ assigned_physiotherapist.last_name }}</h4>
+                            <h5 class="mt-3">{{ assigned_physiotherapist.email }}</h5>
+                        </div>
+                    </div>
+                </div> <!-- end col-->
+                
+            </div>    
+            
+
+        </div>
+        <!-- container -->
+
+    </div>
+    <!-- content -->
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+
+<script>
+
+    const minutesInput = document.getElementById('minutes');
+        const minutesMessage = document.getElementById('minutesMessage');
+
+        // Add an event listener to the minutes input field
+        minutesInput.addEventListener('input', function () {
+            const inputValue = parseInt(minutesInput.value, 10);
+            
+            // Check if the input exceeds the maximum value (5)
+            if (inputValue > 5) {
+                minutesInput.value = 5; // Set the value to 5
+                minutesMessage.textContent = 'Maximum value is 5. Value set to 5.';
+            } else {
+                minutesMessage.textContent = ''; // Clear the error message
+            }
+        });
+
+</script>
+
+{% endblock %}

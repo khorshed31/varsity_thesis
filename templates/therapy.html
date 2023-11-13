@@ -12,7 +12,7 @@
                 <div class="col-12">
                     <div class="page-title-box">                                    
                         
-                        <h4 class="page-title">Home</h4>
+                        <h4 class="page-title">Exercises</h4>
                     </div>
                 </div>
             </div>
@@ -29,10 +29,12 @@
                 {% for record in records %}
                     <div class="col-sm-6 col-lg-3">
                         <div class="card" onclick="execrise(`{{ record.execrise_type }}`,`{{ record.execrise_name }}`)">
-                            <img src="/static/assets/images/e1.jpg" class="card-img-top" alt="...">
+                            <img src="/static/assets/images/exercises/{{ forloop.counter }}.jpg" class="card-img-top" style="
+                            height: 211px;
+                        " alt="...">
                             <div class="card-body">
-                                <h5 class="card-title"><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#login-modal"
-                                    class="text-success stretched-link" style="text-transform: uppercase;">{{ record.execrise_name }}</a></h5>
+                                <h4 class="card-title"><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#login-modal"
+                                    class="text-black stretched-link" style="text-transform: uppercase;">{{ record.execrise_name }}</a></h4>
                                 <p class="card-text">
                                     
                                 </p>

@@ -16,6 +16,7 @@ from .models import Report
 from .models import Exercise 
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
+from account.models import AssignedPatient
 
 # Create your views here.
 def home(request):
@@ -254,3 +255,13 @@ def delete_report(request, report_id):
         messages.error(request, f'Error deleting report: {str(e)}', extra_tags='custom-error')  # Set error message with custom tag
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))  # Redirect back to the previous page
+
+
+def my_physiotherapist(request):
+
+    # Find the patient's assigned physiotherapist, assuming only one is assigned.
+    assigned_patient = AssignedPatient.objects.filter(user=request.user, is_active=True).first()
+
+    assigned_physiotherapist = assigned_patient.physiotherapist if assigned_patient else None
+
+    return render(request, 'physiotherepist_name.html', {'assigned_physiotherapist': assigned_physiotherapist})
